@@ -32,6 +32,17 @@ L2_1 <- L2_1[-1, ]
 L2_2 <- L2_2[-1, ]
 L2_3 <- L2_3[-1, ]
 
+# Normalize Fo' and Fm' by Fo and Fm --------------------------------------
+WT_1 <- mutate(WT_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[1], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[1])
+WT_2 <- mutate(WT_2, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[2], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[2])
+WT_3 <- mutate(WT_3, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[3], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[3])
+L1_1 <- mutate(L1_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[4], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[4])
+L1_2 <- mutate(L1_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[5], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[5])
+L1_3 <- mutate(L1_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[6], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[6])
+L2_1 <- mutate(L2_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[7], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[7])
+L2_2 <- mutate(L2_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[8], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[8])
+L2_3 <- mutate(L2_1, "Fo'" =  Fo.or.F./Fo_Fm$Fo.or.F.[9], "Fm'" =  Fm.or.Fm./Fo_Fm$Fm.or.Fm.[9])
+
 # Combine into single dataset ---------------------------------------------
 data <- list(WT_1, WT_2, WT_3, L1_1, L1_2, L1_3, L2_1, L2_2, L2_3)
 data <- merge_all(data)
@@ -40,7 +51,7 @@ data <- merge_all(data)
 data <- melt(data, id.vars = c("Strain", "Replicate", "Index", "Acq.type", "Seq.acq.1", "Date", "Time", "PMT.eht", "LED.set", "LED.flux", "dbar", "PAR"))
 
 # Select variables for plotting -------------------------------------------
-data <- filter(data, variable == "Sigma" | variable == "Fv.Fm.or.Fq..Fm." | variable == "Fo.or.F." | variable == "Fm.or.Fm.")
+data <- filter(data, variable == "Sigma" | variable == "Fv.Fm.or.Fq..Fm." | variable == "Fo'" | variable == "Fm'")
 
 # Group data --------------------------------------------------------------
 data <- group_by(data,variable, PAR, Strain, Replicate)
@@ -54,12 +65,6 @@ data_tail <- cbind(data_tail[,1:4], data_tail[,18])
 data_tail <- melt(data_tail, id.vars = c("Strain", "Experiment", "Replicate", "PAR"))
 names(data_tail)[5] <- "Measurement"
 
-# Calculate and add F'o/Fo and F'm/Fm -------------------------------------
-
-
-
-# data_tails <- group_by(data_tail, Strain, Experiment, Replicate, PAR, Measurement)
-
 # Calculate stats for plotting --------------------------------------------
 Stats <- ddply(data_tail, c("Strain", "Experiment", "PAR"), summarise,
                N    = length(value),
@@ -71,8 +76,8 @@ Stats <- ddply(data_tail, c("Strain", "Experiment", "PAR"), summarise,
 # Stats <- summarise(Sum_replicates, Mean = mean(Rep_Mean), Stdev = sd(Rep_Mean))
 
 # Change variable names and order -----------------------------------------
-Stats$Experiment <- factor(Stats$Experiment, levels = c("Fo.or.F.", "Fm.or.Fm.", "Fa.or.Fa.", "Fmr.or.Fmr.", "Fv.Fm.or.Fq..Fm.", "X.Chl.", "p", "RSigma", "Sigma", "Tau", "Ra", "PAR.x.Fq..Fm.", "C..1.qJ.", "C..1.qP.", "C..1.qL.", "JPSII.x.qJ", "JPSII.x.qP", "JPSII.x.qL", "SE"))
-levels(Stats$Experiment ) <- c("Fo", "Fm", "Fa.or.Fa.", "Fmr.or.Fmr.", "Fv/Fm", "X.Chl.", "p", "RSigma", "Sigma", "Tau", "Ra", "PAR.x.Fq..Fm.", "C..1.qJ.", "C..1.qP.", "C..1.qL.", "JPSII.x.qJ", "JPSII.x.qP", "JPSII.x.qL", "SE")
+Stats$Experiment <- factor(Stats$Experiment, levels = c("Fo.or.F.", "Fm.or.Fm.", "Fo'", "Fm'", "Fa.or.Fa.", "Fmr.or.Fmr.", "Fv.Fm.or.Fq..Fm.", "X.Chl.", "p", "RSigma", "Sigma", "Tau", "Ra", "PAR.x.Fq..Fm.", "C..1.qJ.", "C..1.qP.", "C..1.qL.", "JPSII.x.qJ", "JPSII.x.qP", "JPSII.x.qL", "SE"))
+levels(Stats$Experiment) <- c("Fo", "Fm", "Fo'", "Fm'", "Fa.or.Fa.", "Fmr.or.Fmr.", "Fv/Fm", "X.Chl.", "p", "RSigma", "Sigma", "Tau", "Ra", "PAR.x.Fq..Fm.", "C..1.qJ.", "C..1.qP.", "C..1.qL.", "JPSII.x.qJ", "JPSII.x.qP", "JPSII.x.qL", "SE")
 levels(Stats$Strain) <- c("WT", "lca1", "lca2")
 
 # Prepare for plotting ----------------------------------------------------
