@@ -50,9 +50,6 @@ data <- merge_all(data)
 # Melt dataset ------------------------------------------------------------
 data <- melt(data, id.vars = c("Strain", "Replicate", "Index", "Acq.type", "Seq.acq.1", "Date", "Time", "PMT.eht", "LED.set", "LED.flux", "dbar", "PAR"))
 
-# Select variables for plotting -------------------------------------------
-data <- filter(data, variable == "Sigma" | variable == "Fv.Fm.or.Fq..Fm." | variable == "Fo'" | variable == "Fm'" | variable == "PAR.x.Fq..Fm.")
-
 # Group data --------------------------------------------------------------
 data <- group_by(data,variable, PAR, Strain, Replicate)
 
@@ -64,7 +61,6 @@ names(data_tail)[2] <- "Experiment"
 data_tail <- cbind(data_tail[,1:4], data_tail[,18])
 data_tail <- melt(data_tail, id.vars = c("Strain", "Experiment", "Replicate", "PAR"))
 names(data_tail)[5] <- "Measurement"
-
 
 # View data before stats for error checking -------------------------------
 data_view <- arrange(data_tail, Experiment, PAR, Strain, Replicate, Measurement)
@@ -81,8 +77,11 @@ Stats$Experiment <- factor(Stats$Experiment, levels = c("Fo.or.F.", "Fm.or.Fm.",
 levels(Stats$Experiment) <- c("Fo", "Fm", "Fo'/Fo", "Fm'/Fm", "Fa.or.Fa.", "Fmr.or.Fmr.", "Fq'/Fm'", "PAR x Fq'/Fm'", "Chl", "p", "RSigma", "Sigma'", "Tau", "Ra", "C..1.qJ.", "C..1.qP.", "C..1.qL.", "JPSII.x.qJ", "JPSII.x.qP", "JPSII.x.qL", "SE")
 levels(Stats$Strain) <- c("WT", "lca1", "lca2")
 
+# Select variables for plotting -------------------------------------------
+plot_data <- filter(Stats, PAR >= 7 & (Experiment == "Sigma'" | Experiment == "Fq'/Fm'" | Experiment == "Fo'/Fo" | Experiment == "Fm'/Fm" | Experiment == "PAR x Fq'/Fm'"))
+
 # Prepare for plotting ----------------------------------------------------
-plot1 <- ggplot(data=Stats, aes(PAR, Mean, color=Strain)) +
+plot1 <- ggplot(data=plot_data, aes(PAR, Mean, color=Strain)) +
     geom_line() + 
     geom_point() + 
     geom_errorbar(aes(PAR, ymin = Mean - Stdev, ymax = Mean + Stdev, width=0.2)) + 
